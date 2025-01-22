@@ -49,6 +49,7 @@ app.post('/user', (req, res)=>{
     res.status(201).json(novoUsuario);
 })
  
+// TERMINAR  
 //PUT - atualizar informações
 app.put('/user/:id', (req,res) =>{
     const id = req.params.id // guardar o id que vem na url atraves dos parametros
