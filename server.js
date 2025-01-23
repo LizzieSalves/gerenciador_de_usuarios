@@ -2,11 +2,11 @@ import express from "express";
 import { v4 as uuidv4 } from "uuid";
  
 const app = express();
-const porta = 3000
+const port = 3000
  
 app.use(express.json());// middleware responsavel por interpretar o json do corpo das requisições
  
-const usuarios = [];
+const users = [];
 
 /*
   Forma de testar
@@ -15,20 +15,21 @@ const usuarios = [];
   "email":"dora@gmail.com"
 }
 
+ Corrigir erro em get
  */
  
 //GET - buscar usuarios
-app.get('/user',(req, res) => {
-    res.status(200).json(usuarios)
+app.get('/users',(req, res) => {
+    res.status(200).json(users)
 })
  
 //GET - buscar usuario pelo ID
-app.get('/user/:id',(req, res) => {
-    const id = req.params.id 
-    const idUsuario = usuarios.find((usuarios) => usuarios.id === id)
+app.get('/users/:id',(req, res) => {
+    const userId = parseInt(req.params.userId)
+    const user = users.find((u) => u.id === userId)
     // const idUsuario = usuarios.find(usuarios)
 
-    if(!idUsuario){
+    if(!user){
         return res.status(404).json({message: 'usuario não encontrado'})
     } 
 })
@@ -36,57 +37,59 @@ app.get('/user/:id',(req, res) => {
 
 
 //POST - inserir usuario
-app.post('/user', (req, res)=>{
+app.post('/users', (req, res)=>{
     const {name, email} = req.body
  
-    if(!name || !email === undefined){
-        return res.status(400).json({message: 'Todos os campos são nescessarios'})
+    if(!name || !email){
+        return res.status(400).json({message: 'Nome e email são obrigatórios'})
     }
  
-    const novoUsuario = {id: uuidv4(), name, email}
-    usuarios.push(novoUsuario)
- 
-    res.status(201).json(novoUsuario);
+    const newUser = {id: users.length > 0 ? users[users.length - 1].id + 1 : 1,
+        name,
+        email,
+    };
+
+    users.push(newUser)
+    res.status(201).json(newUser);
 })
  
 // TERMINAR  
 //PUT - atualizar informações
-app.put('/user/:id', (req,res) =>{
-    const id = req.params.id // guardar o id que vem na url atraves dos parametros
-    const {name, email} = req.body
+app.put('/users/:id', (req,res) =>{
+    const userId = parseInt(req.params.id); // guardar o id que vem na url atraves dos parametros
+    const {name, email} = req.body;
  
-    const atualizarUsuario = usuario.find((usuario) => usuario.id === id)
+    const userIndex = users.findIndex(u => u.id === userId);
  
-    if(!atualizarUsuario){
-        return res.status(404).json({message: 'usuario não encontrado'})
+    if(userIndex === -1){
+        return res.status(404).json({message: 'Usuário não encontrado'});
     }
  
-    notaParaAtualizar.nomeEstudante = nomeEstudante || notaParaAtualizar.nomeEstudante
-    notaParaAtualizar.curso = curso || notaParaAtualizar.curso
-    notaParaAtualizar.nota = nota !== undefined ? nota : notaParaAtualizar
- 
-    res.status(200).json(notaParaAtualizar)
-})
+    // Atualizando o usuario
+    users[userIndex] = {
+        ...users[userIndex],
+        name: name || users[userIndex].name,
+        email: email || users[userIndex].email,
+    };
+
+    res.status(200).json(users[userIndex]);
+});
  
 //Delete - excluir informacoes
-app.delete("/grades/:id", (req, res)=>{
-    const {id} = req.params
-    const index = notas.findIndex((nota) => nota.id === id)
+app.delete("/users/:id", (req, res)=>{
+    const userId = parseInt(req.params.id);
+    const userIndex = users.findIndex(u => u.id === userId);
  
-    if(index === -1){
-        return res.status(400).json({message: 'nota não encontrada'})
+    if(userIndex === -1){
+        return res.status(400).json({message: 'Usuário não encontrada'})
     }
  
-    notas.splice(index, 1)// remove o objeto de nota do array de notas pelo seu index
+    notas.splice(userIndex, 1)// remove o objeto de nota do array de notas pelo seu index
     res.status(204).send(); // retorna o status 204 que significa sem conteudo ou no content
  
 })
  
 //Middleware para rotas nao encontradas
-app.use((req, res) => {
-    res.status(404).json({message: 'Rota nao encontrada'});
-});
- 
-app.listen(porta, ()=>{
-    console.log(`Servidor rodando na porta ${porta}`);
+app.listen(port, ()=>{
+    console.log(`Servidor rodando na porta http://localhost${port}`);
 })
